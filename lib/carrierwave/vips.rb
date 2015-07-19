@@ -54,19 +54,18 @@ module CarrierWave
         o = image.get('exif-Orientation').to_i rescue nil
         o ||= image.get('exif-ifd0-Orientation').to_i rescue 1
         case o
-          when 1
-            # Do nothing, everything is peachy
-          when 6
-            image.rot270
-          when 8
-            image.rot180
-          when 3
-            image.rot90
-          else
-            raise('Invalid value for Orientation: ' + o.to_s)
+        when 6
+          image.rot90
+        when 8
+          image.rot270
+        when 3
+          image.rot180
+        else
+          return
+        end.tap do |i|
+          i.set('exif-Orientation', '1')
+          i.set('exif-ifd0-Orientation', '1')
         end
-        image.set('exif-Orientation', '')
-        image.set('exif-ifd0-Orientation', '')
       end
     end
 
