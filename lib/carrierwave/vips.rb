@@ -54,21 +54,7 @@ module CarrierWave
     #
     def auto_orient
       manipulate! do |image|
-        o = image.get('exif-Orientation').to_i rescue nil
-        o ||= image.get('exif-ifd0-Orientation').to_i rescue 1
-        case o
-        when 6
-          image.rot90
-        when 8
-          image.rot270
-        when 3
-          image.rot180
-        else
-          return
-        end.tap do |i|
-          i.set('exif-Orientation', '1')
-          i.set('exif-ifd0-Orientation', '1')
-        end
+        image.autorot
       end
     end
 
