@@ -3,20 +3,24 @@ CarrierWave-VIPS
 
 [![Build Status](https://secure.travis-ci.org/eltiare/carrierwave-vips.png?branch=master)](http://travis-ci.org/eltiare/carrierwave-vips)
 
+Debian does not have a library for VIPS 8 yet. As soon as I can work out how to get it in a Travis build the tests should pass. In the meantime you can clone this repo yourself and run `rspec` in the base directory.
+
 This adds support to CarrierWave for the ultrafast and resource efficient
-VIPS library. It is ready for production - but if you do encounter any
-problems please be sure to report them on Github so that we can fix them.
+VIPS library.
+
 
 Installation
 ---------------------
 
     gem install carrierwave-vips
 
-You will also need ruby-vips. For instructions on how to install that see the repo: https://github.com/jcupitt/ruby-vips
+If you need support for VIPS 7 please install a 1.0.x version of this gem. You will also need ruby-vips for VIPS 8.  For instructions on how to install that see the repo: https://github.com/jcupitt/ruby-vips
 
 If you are using bundler, add this to your Gemfile:
 
     gem 'carrierwave-vips'
+    
+You will need to install the `rmagick` gem if you want to load GIF files. Writing GIFs is not supported by ruby-vips or this library.
 
 
 A quick overview
@@ -39,11 +43,31 @@ You can use the following methods to change your images.
 * `strip` Removes any exif and ICC metadata contained in the image to reduce filesize.
 * `auto_orient` Rotates the image according to the Orientation EXIF tag and then removes the tag.
 
-Please note that GIF writing is not supported by libvips, and therefore cannot be supported by ruby-vips nor this library. GIF reading is still supported.
-
-In order to use the strip method, a recent version of libvips is required. It is recommended to use at least 7.30.2. Tested on 7.30 on Debian + OS X 10.7.3/HomeBrew
-
 To see how vips stands up to other image processing libraries, see this benchmark:  https://github.com/stanislaw/carrierwave-vips-benchmarks
+
+Configuration
+-------------
+
+When reducing the size of images, a sharpening mask is used. To change or disable this behavior:
+
+```
+CarrierWave::Vips.configure do |c|
+  c.sharpen_mask = false  # Disable sharpening mask on image reduction
+  c.sharpen_mask = [      # Default mask
+    [ -1, -1, -1 ], 
+    [ -1, 24, -1 ], 
+    [ -1, -1, -1 ] 
+  ]
+  c.sharpen_scale = 16     
+end
+```
+
+See VIPS::Image.new_from_array for more information on what these two do. 
+
+Special considerations
+----------------------
+
+If you use `convert` this library overrides the `filename` method used by CarrierWave to give the proper extension to the upload. If you want to override this method yourself, you can use the `format_override` method to get the file extension. 
 
 Libraries which rely on CarrierWave-VIPS
 ---------------------
@@ -55,3 +79,4 @@ Contributors
 * John Cupitt (@jcupitt)
 * Stanislaw Pankevich (@stanislaw)
 * Mario Visic (@mariovisic)
+* Thom van Kalkeren (@fletcher91)
